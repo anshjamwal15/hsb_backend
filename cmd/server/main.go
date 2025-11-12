@@ -23,7 +23,7 @@ func main() {
 
 	// Get configuration from environment
 	port := getEnv("PORT", "8080")
-	mongoURI := getEnv("MONGODB_URI", "mongodb://localhost:27017")
+	mongoURI := getEnv("MONGODB_URI", "mongodb+srv://anshjamwal:6u1dWhj20WKHHB0I@cluster0.fniyb.mongodb.net/hsb_backend?appName=Cluster0")
 	mongoDatabase := getEnv("MONGODB_DATABASE", "hsb_backend")
 	jwtSecret := getEnv("JWT_SECRET", "your-secret-key-change-in-production")
 
