@@ -279,14 +279,6 @@ go test ./...
 4. Push to the branch
 5. Create a Pull Request
 
-## 📄 License
-
-This project is proprietary and confidential.
-
-## 📞 Support
-
-For support, email support@womenhealth.com
-
 ---
 
 **Built with ❤️ using Go and MongoDB**
