@@ -1,0 +1,3225 @@
+openapi: 3.0.3
+info:
+  title: Women's Health API
+  description: |
+    Comprehensive API for Women's Health mobile application including user management, 
+    health tracking, consultations, diagnostics, mental health, and community features.
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@womenhealth.com
+servers:
+  - url: https://womenhealth-api.volvrit.org
+    description: Production server
+  - url: http://localhost:8080
+    description: Local development server
+
+tags:
+  - name: Authentication
+    description: User authentication and account management
+  - name: User Profile
+    description: User profile management
+  - name: Doctors
+    description: Doctor management and listings
+  - name: Sessions & Bookings
+    description: Session bookings and consultations
+  - name: Clinics
+    description: Clinic management and bookings
+  - name: Diagnostics
+    description: Diagnostic tests and bookings
+  - name: Period Tracker
+    description: Period cycle tracking
+  - name: Pregnancy Tracker
+    description: Pregnancy tracking
+  - name: Sexual Wellness (FSFI)
+    description: Female Sexual Function Index assessment
+  - name: Mental Health
+    description: Mental health tests and tracking
+  - name: PCOS Assessment
+    description: PCOS assessment and history
+  - name: Symptoms Tracking
+    description: Symptoms and mood tracking
+  - name: Weight & Metabolic Wellness
+    description: Weight and metabolic wellness tracking
+  - name: Journals
+    description: Personal journal entries
+  - name: Test Results
+    description: Test results management
+  - name: Chat
+    description: Chat and messaging
+  - name: Media Gallery
+    description: Media gallery management
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from login endpoint
+  
+  schemas:
+    # Authentication Schemas
+    RegisterRequest:
+      type: object
+      required:
+        - name
+        - email
+        - phoneNumber
+        - password
+      properties:
+        name:
+          type: string
+          example: "Jane Doe"
+        email:
+          type: string
+          format: email
+          example: "jane.doe@example.com"
+        phoneNumber:
+          type: string
+          example: "+919876543210"
+        password:
+          type: string
+          format: password
+          example: "SecurePass123!"
+    
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: "jane.doe@example.com"
+        password:
+          type: string
+          format: password
+          example: "SecurePass123!"
+    
+    AuthResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        token:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+
+    
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "689b36243fcf0bb96f7d2abf"
+        name:
+          type: string
+          example: "Jane Doe"
+        email:
+          type: string
+          format: email
+          example: "jane.doe@example.com"
+        phoneNumber:
+          type: string
+          example: "+919876543210"
+        profileImage:
+          type: string
+          example: "https://womenhealth-api.volvrit.org/uploads/profile.jpg"
+    
+    ForgotPasswordRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+    
+    VerifyOTPRequest:
+      type: object
+      required:
+        - email
+        - otp
+      properties:
+        email:
+          type: string
+          format: email
+        otp:
+          type: string
+          example: "123456"
+    
+    ResetPasswordRequest:
+      type: object
+      required:
+        - email
+        - otp
+        - newPassword
+      properties:
+        email:
+          type: string
+          format: email
+        otp:
+          type: string
+        newPassword:
+          type: string
+          format: password
+    
+    ChangePasswordRequest:
+      type: object
+      required:
+        - currentPassword
+        - newPassword
+      properties:
+        currentPassword:
+          type: string
+          format: password
+        newPassword:
+          type: string
+          format: password
+
+    
+    # Doctor Schemas
+    Doctor:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "60d5ec49f1b2c72b8c8e4f1a"
+        name:
+          type: string
+          example: "Dr. Sarah Johnson"
+        experience:
+          type: string
+          example: "15 years"
+        qualifications:
+          type: string
+          example: "MBBS, MD (Obstetrics & Gynecology)"
+        image:
+          type: string
+          example: "/uploads/doctors/doctor1.jpg"
+        specialization:
+          type: string
+          example: "Gynecology"
+        bio:
+          type: string
+        about:
+          type: string
+        rating:
+          type: number
+          format: double
+          example: 4.8
+        totalReviews:
+          type: integer
+          example: 150
+        location:
+          type: string
+          example: "Mumbai, Maharashtra"
+        phone:
+          type: string
+          example: "+919876543210"
+        email:
+          type: string
+          format: email
+        languages:
+          type: array
+          items:
+            type: string
+          example: ["English", "Hindi", "Marathi"]
+        consultationFees:
+          type: object
+          properties:
+            videoCall:
+              type: number
+            audioCall:
+              type: number
+            inClinic:
+              type: number
+        isAvailable:
+          type: boolean
+        timing:
+          $ref: '#/components/schemas/Timing'
+        packageIncludes:
+          type: array
+          items:
+            type: string
+        isApproved:
+          type: boolean
+        isDeleted:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    
+    DoctorListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Doctor'
+        current_page:
+          type: integer
+        total_pages:
+          type: integer
+        total_doctors:
+          type: integer
+        has_next_page:
+          type: boolean
+        has_previous_page:
+          type: boolean
+    
+    Timing:
+      type: object
+      properties:
+        from:
+          type: string
+          example: "09:00"
+        to:
+          type: string
+          example: "18:00"
+    
+    # Clinic Schemas
+    Clinic:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+          example: "City Hospital"
+        address:
+          type: string
+          example: "123 Main Street"
+        city:
+          type: string
+          example: "Mumbai"
+        state:
+          type: string
+          example: "Maharashtra"
+        pincode:
+          type: string
+          example: "400001"
+        phone:
+          type: string
+          example: "+919876543210"
+        email:
+          type: string
+          format: email
+        description:
+          type: string
+        appointmentFee:
+          type: integer
+          example: 500
+        healthDataIds:
+          type: array
+          items:
+            type: string
+        timing:
+          $ref: '#/components/schemas/Timing'
+        image:
+          type: string
+        isApproved:
+          type: boolean
+        isDeleted:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    
+    ClinicBookingRequest:
+      type: object
+      required:
+        - healthDataId
+        - sessionId
+        - clinicId
+        - date
+        - timeSlot
+      properties:
+        healthDataId:
+          type: string
+        sessionId:
+          type: string
+        clinicId:
+          type: string
+        date:
+          type: string
+          format: date
+          example: "2025-11-15"
+        timeSlot:
+          type: string
+          example: "10:00 AM"
+    
+    ClinicBookingResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            bookingId:
+              type: string
+            razorpayOrderId:
+              type: string
+            amount:
+              type: integer
+    
+    # Diagnostics Schemas
+    Diagnostics:
+      type: object
+      properties:
+        _id:
+          type: string
+        testName:
+          type: string
+          example: "Complete Blood Count (CBC)"
+        testPrice:
+          type: number
+          example: 500.00
+        testImage:
+          type: string
+          example: "/uploads/diagnostics/cbc.jpg"
+        healthDataId:
+          type: string
+        description:
+          type: string
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    
+    DiagnosticsListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        totalDocs:
+          type: integer
+        limit:
+          type: integer
+        totalPages:
+          type: integer
+        page:
+          type: integer
+        pagingCounter:
+          type: integer
+        hasPrevPage:
+          type: boolean
+        hasNextPage:
+          type: boolean
+        prevPage:
+          type: integer
+          nullable: true
+        nextPage:
+          type: integer
+          nullable: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Diagnostics'
+
+    
+    DiagnosticsUser:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+          example: "City Diagnostics Lab"
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        address:
+          type: string
+        city:
+          type: string
+        pincode:
+          type: string
+        state:
+          type: string
+        description:
+          type: string
+        timing:
+          $ref: '#/components/schemas/Timing'
+        isApproved:
+          type: boolean
+        isDeleted:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    
+    DiagnosticsBookingRequest:
+      type: object
+      required:
+        - diagnosticsId
+        - date
+        - time
+      properties:
+        diagnosticsId:
+          type: string
+        date:
+          type: string
+          format: date
+          example: "2025-11-15"
+        time:
+          type: string
+          example: "10:00 AM"
+        notes:
+          type: string
+    
+    # Journal Schemas
+    Journal:
+      type: object
+      properties:
+        _id:
+          type: string
+        userId:
+          type: string
+        title:
+          type: string
+          example: "My Daily Reflection"
+        content:
+          type: string
+          example: "Today was a good day..."
+        category:
+          type: string
+          example: "Mental Health"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    
+    JournalRequest:
+      type: object
+      required:
+        - userId
+        - content
+        - category
+      properties:
+        userId:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        category:
+          type: string
+
+    
+    JournalListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Journal'
+        total:
+          type: integer
+        page:
+          type: integer
+        pages:
+          type: integer
+    
+    # Mental Health Schemas
+    MentalHealthTest:
+      type: object
+      properties:
+        _id:
+          type: string
+        testName:
+          type: string
+          example: "Depression"
+        name:
+          type: string
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TestQuestion'
+        sections:
+          type: array
+          items:
+            $ref: '#/components/schemas/TestSection'
+        thresholds:
+          type: array
+          items:
+            $ref: '#/components/schemas/TestThreshold'
+        criticalItems:
+          type: array
+          items:
+            type: object
+        criticalNote:
+          type: string
+    
+    TestQuestion:
+      type: object
+      properties:
+        _id:
+          type: string
+        questionText:
+          type: string
+        responseType:
+          type: string
+          enum: [mcq, slider, binary]
+        options:
+          type: array
+          items:
+            type: object
+            properties:
+              label:
+                type: string
+              value:
+                type: integer
+        responseRange:
+          type: object
+          properties:
+            min:
+              type: integer
+            max:
+              type: integer
+    
+    TestSection:
+      type: object
+      properties:
+        _id:
+          type: string
+        sectionTitle:
+          type: string
+        description:
+          type: string
+        responseType:
+          type: string
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TestQuestion'
+        options:
+          type: array
+          items:
+            type: object
+
+    
+    TestThreshold:
+      type: object
+      properties:
+        min:
+          type: integer
+        max:
+          type: integer
+        severity:
+          type: string
+        recommendation:
+          type: string
+        alertLevel:
+          type: string
+    
+    TestResultSubmission:
+      type: object
+      required:
+        - testName
+        - totalScore
+        - obtainedScore
+        - testDate
+      properties:
+        testName:
+          type: string
+        totalScore:
+          type: integer
+        obtainedScore:
+          type: integer
+        recommendation:
+          type: string
+        testDate:
+          type: string
+          format: date
+        notes:
+          type: string
+    
+    # FSFI (Sexual Wellness) Schemas
+    FSFIResult:
+      type: object
+      properties:
+        _id:
+          type: string
+        user:
+          type: string
+        domainScores:
+          type: object
+          properties:
+            desire:
+              type: number
+            arousal:
+              type: number
+            lubrication:
+              type: number
+            orgasm:
+              type: number
+            satisfaction:
+              type: number
+            pain:
+              type: number
+        responses:
+          type: array
+          items:
+            type: object
+        totalScore:
+          type: number
+        diagnosis:
+          type: string
+        submittedAt:
+          type: string
+          format: date-time
+    
+    FSFIResultsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/FSFIResult'
+
+    
+    # Symptoms Tracking Schemas
+    SymptomsTrackingRequest:
+      type: object
+      required:
+        - type
+        - date
+      properties:
+        type:
+          type: string
+          enum: [Period, Pregnancy]
+        whatAreYouFeelingToday:
+          type: array
+          items:
+            type: string
+        sexAndSexDrive:
+          type: array
+          items:
+            type: string
+        mood:
+          type: array
+          items:
+            type: string
+        symptoms:
+          type: array
+          items:
+            type: string
+        physicalActivity:
+          type: array
+          items:
+            type: string
+        digestionAndStool:
+          type: array
+          items:
+            type: string
+        pregnancyTest:
+          type: array
+          items:
+            type: string
+        ovulationTest:
+          type: array
+          items:
+            type: string
+        vaginalDischarge:
+          type: array
+          items:
+            type: string
+        other:
+          type: array
+          items:
+            type: string
+        date:
+          type: string
+          format: date
+    
+    # Group & Community Schemas
+    Group:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        image:
+          type: string
+        memberCount:
+          type: integer
+        isPrivate:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+    
+    GroupPost:
+      type: object
+      properties:
+        _id:
+          type: string
+        groupId:
+          type: string
+        userId:
+          type: string
+        content:
+          type: string
+        images:
+          type: array
+          items:
+            type: string
+        likes:
+          type: integer
+        comments:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    
+    # Session & Booking Schemas
+    TimeSlot:
+      type: object
+      properties:
+        time:
+          type: string
+          example: "10:00 AM"
+        available:
+          type: boolean
+    
+    BookingRequest:
+      type: object
+      required:
+        - doctorId
+        - sessionType
+        - date
+        - timeSlot
+      properties:
+        doctorId:
+          type: string
+        sessionType:
+          type: string
+          enum: [Video Call, Audio Call, In-Clinic, Chat]
+        date:
+          type: string
+          format: date
+        timeSlot:
+          type: string
+        notes:
+          type: string
+    
+    BookingResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            bookingId:
+              type: string
+            razorpayOrderId:
+              type: string
+            amount:
+              type: integer
+            status:
+              type: string
+    
+    # Payment Verification Schemas
+    PaymentVerificationRequest:
+      type: object
+      required:
+        - razorpayOrderId
+        - razorpayPaymentId
+        - razorpaySignature
+      properties:
+        razorpayOrderId:
+          type: string
+        razorpayPaymentId:
+          type: string
+        razorpaySignature:
+          type: string
+        bookingId:
+          type: string
+    
+    # Blog Schemas
+    Blog:
+      type: object
+      properties:
+        _id:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        author:
+          type: string
+        image:
+          type: string
+        category:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        publishedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    
+    # Error Response
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "Error message"
+        error:
+          type: string
+
+paths:
+  # Authentication Endpoints
+  /user/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new user
+      description: Create a new user account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - password
+                - phone
+                - dateOfBirth
+                - gender
+              properties:
+                name:
+                  type: string
+                  example: "John Doe"
+                email:
+                  type: string
+                  format: email
+                  example: "user@example.com"
+                password:
+                  type: string
+                  format: password
+                  minLength: 6
+                  example: "password123"
+                phone:
+                  type: string
+                  example: "+1234567890"
+                dateOfBirth:
+                  type: string
+                  format: date
+                  example: "1990-01-01"
+                gender:
+                  type: string
+                  enum: ["male", "female", "other"]
+                  example: "female"
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "User registered successfully"
+                  data:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request
+  
+  /user/login:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      description: Authenticate user and get JWT token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "user@example.com"
+                password:
+                  type: string
+                  format: password
+                  example: "password123"
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Invalid credentials
+  
+  /user/forgot-password:
+    post:
+      tags:
+        - Authentication
+      summary: Request password reset
+      description: Send OTP to user's email for password reset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "user@example.com"
+      responses:
+        '200':
+          description: OTP sent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "OTP sent to email"
+        '404':
+          description: User not found
+  
+  /user/verify-otp:
+    post:
+      tags:
+        - Authentication
+      summary: Verify OTP
+      description: Verify the OTP sent to user's email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyOTPRequest'
+      responses:
+        '200':
+          description: OTP verified successfully
+        '400':
+          description: Invalid OTP
+  
+  /user/reset-password:
+    post:
+      tags:
+        - Authentication
+      summary: Reset password
+      description: Reset user password with OTP verification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+      responses:
+        '200':
+          description: Password reset successfully
+        '400':
+          description: Invalid request
+  
+  /user/change-password:
+    post:
+      tags:
+        - Authentication
+      summary: Change password
+      description: Change password for authenticated user
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+      responses:
+        '200':
+          description: Password changed successfully
+        '401':
+          description: Unauthorized
+
+  
+  # User Profile Endpoints
+  /user/profile:
+    get:
+      tags:
+        - User Profile
+      summary: Get user profile
+      description: Get the authenticated user's profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+    
+    put:
+      tags:
+        - User Profile
+      summary: Update user profile
+      description: Update authenticated user's profile information
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                phoneNumber:
+                  type: string
+                profileImage:
+                  type: string
+      responses:
+        '200':
+          description: Profile updated successfully
+        '401':
+          description: Unauthorized
+  
+  # Health Data Endpoints
+  /api/health-data:
+    get:
+      tags:
+        - Health Data
+      summary: Get dashboard health data
+      description: Retrieve user's health data for dashboard
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Health data retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+        '401':
+          description: Unauthorized
+
+  
+  # Doctor Endpoints
+  /api/doctors:
+    get:
+      tags:
+        - Doctors
+      summary: Get list of doctors
+      description: Get a list of available doctors
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: specialty
+          schema:
+            type: string
+          description: Filter by doctor specialty
+        - in: query
+          name: name
+          schema:
+            type: string
+          description: Search by doctor name
+      responses:
+        '200':
+          description: List of doctors retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Doctor'
+  
+  /api/doctors/{doctorId}:
+    get:
+      tags:
+        - Doctors
+      summary: Get doctor by ID
+      description: Get detailed information about a specific doctor
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: doctorId
+          required: true
+          schema:
+            type: string
+          description: ID of the doctor to retrieve
+      responses:
+        '200':
+          description: Doctor details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Doctor'
+        '404':
+          description: Doctor not found
+  
+  # Session & Booking Endpoints
+  /api/time-slots:
+    get:
+      tags:
+        - Sessions & Bookings
+      summary: Get available time slots
+      description: Get available time slots for a doctor on a specific date
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: doctorId
+          schema:
+            type: string
+          required: true
+          description: ID of the doctor
+        - in: query
+          name: date
+          schema:
+            type: string
+            format: date
+          required: true
+          description: Date to check availability (YYYY-MM-DD)
+      responses:
+        '200':
+          description: Available time slots retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      type: string
+                      format: time
+                      example: "09:00"
+
+  /api/bookings:
+    post:
+      tags:
+        - Sessions & Bookings
+      summary: Create a new booking
+      description: Create a new booking with a doctor for a specific time slot
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingRequest'
+      responses:
+        '201':
+          description: Booking created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+        '400':
+          description: Bad request
+  
+  /api/bookings/verify:
+    post:
+      tags:
+        - Sessions & Bookings
+      summary: Verify booking payment
+      description: Verify Razorpay payment for booking
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentVerificationRequest'
+      responses:
+        '200':
+          description: Payment verified successfully
+        '400':
+          description: Payment verification failed
+  
+  /api/bookings/my-with-doctors:
+    get:
+      tags:
+        - Sessions & Bookings
+      summary: Get user's bookings
+      description: Retrieve all bookings for authenticated user with doctor details
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Bookings retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+
+  
+  /api/sessions/active:
+    get:
+      tags:
+        - Sessions & Bookings
+      summary: Get active sessions
+      description: Retrieve active sessions for user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Active sessions retrieved successfully
+  
+  /api/agora/session-token:
+    post:
+      tags:
+        - Sessions & Bookings
+      summary: Generate Agora session token
+      description: Generate token for video/audio call session
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                channelName:
+                  type: string
+                uid:
+                  type: integer
+      responses:
+        '200':
+          description: Token generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+  
+  # Clinic Endpoints
+  /api/clinics:
+    get:
+      tags:
+        - Clinics
+      summary: Get list of clinics
+      description: Retrieve list of clinics, optionally filtered by health data
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: healthDataId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Clinics retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Clinic'
+  
+  /api/clinic-bookings:
+    post:
+      tags:
+        - Clinics
+      summary: Book clinic appointment
+      description: Create a clinic appointment booking
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClinicBookingRequest'
+      responses:
+        '201':
+          description: Clinic booking created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClinicBookingResponse'
+
+  
+  /api/clinic-bookings/my-bookings:
+    get:
+      tags:
+        - Clinics
+      summary: Get user's clinic bookings
+      description: Retrieve all clinic bookings for authenticated user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Clinic bookings retrieved successfully
+  
+  /api/clinic-bookings/verify-payment:
+    post:
+      tags:
+        - Clinics
+      summary: Verify clinic payment
+      description: Verify Razorpay payment for clinic booking
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentVerificationRequest'
+      responses:
+        '200':
+          description: Payment verified successfully
+  
+  # Diagnostics Endpoints
+  /api/public/diagnostics:
+    get:
+      tags:
+        - Diagnostics
+      summary: Get list of diagnostic tests
+      description: Retrieve paginated list of available diagnostic tests
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Diagnostics list retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiagnosticsListResponse'
+  
+  /api/diagnosticsUsers:
+    get:
+      tags:
+        - Diagnostics
+      summary: Get list of diagnostic labs
+      description: Retrieve paginated list of diagnostic labs/users
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Diagnostics users retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DiagnosticsUser'
+
+  
+  /api/diagnostics-bookings:
+    post:
+      tags:
+        - Diagnostics
+      summary: Book diagnostic test
+      description: Create a diagnostic test booking
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DiagnosticsBookingRequest'
+      responses:
+        '201':
+          description: Diagnostics booking created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+  
+  /api/diagnostics-bookings/verify-payment:
+    post:
+      tags:
+        - Diagnostics
+      summary: Verify diagnostics payment
+      description: Verify Razorpay payment for diagnostics booking
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentVerificationRequest'
+      responses:
+        '200':
+          description: Payment verified successfully
+  
+  # Period Tracker Endpoints
+  /api/period-cycle:
+    get:
+      tags:
+        - Period Tracker
+      summary: Get period cycle data
+      description: Retrieve user's period cycle tracking data
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Period cycle data retrieved successfully
+    
+    post:
+      tags:
+        - Period Tracker
+      summary: Add period cycle entry
+      description: Add new period cycle tracking entry
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                startDate:
+                  type: string
+                  format: date
+                endDate:
+                  type: string
+                  format: date
+                cycleLength:
+                  type: integer
+                flow:
+                  type: string
+      responses:
+        '201':
+          description: Period cycle entry added successfully
+    
+    delete:
+      tags:
+        - Period Tracker
+      summary: Reset period tracker
+      description: Reset/delete period cycle data
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Period tracker reset successfully
+
+  
+  # Pregnancy Tracker Endpoints
+  /api/pregnancy-tracker:
+    get:
+      tags:
+        - Pregnancy Tracker
+      summary: Get pregnancy tracking data
+      description: Retrieve user's pregnancy tracking data
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Pregnancy data retrieved successfully
+    
+    post:
+      tags:
+        - Pregnancy Tracker
+      summary: Add pregnancy tracking entry
+      description: Add new pregnancy tracking entry
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dueDate:
+                  type: string
+                  format: date
+                lastPeriodDate:
+                  type: string
+                  format: date
+                weight:
+                  type: number
+                notes:
+                  type: string
+      responses:
+        '201':
+          description: Pregnancy entry added successfully
+  
+  # Sexual Wellness (FSFI) Endpoints
+  /api/fsfi/test:
+    get:
+      tags:
+        - Sexual Wellness
+      summary: Get FSFI test questions
+      description: Retrieve FSFI (Female Sexual Function Index) test questions
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: FSFI test retrieved successfully
+  
+  /api/fsfi/submit:
+    post:
+      tags:
+        - Sexual Wellness
+      summary: Submit FSFI test
+      description: Submit FSFI test responses
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                responses:
+                  type: array
+                  items:
+                    type: object
+      responses:
+        '201':
+          description: FSFI test submitted successfully
+  
+  /api/fsfi/my-results:
+    get:
+      tags:
+        - Sexual Wellness
+      summary: Get FSFI test results
+      description: Retrieve user's FSFI test results history
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: FSFI results retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FSFIResultsResponse'
+
+  
+  # Mental Health Endpoints
+  /api/tests:
+    get:
+      tags:
+        - Mental Health
+      summary: Get list of mental health tests
+      description: Retrieve available mental health tests
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Mental health tests retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+  
+  /api/tests/{testName}:
+    get:
+      tags:
+        - Mental Health
+      summary: Get specific mental health test
+      description: Retrieve questions for a specific mental health test
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: testName
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "Depression"
+      responses:
+        '200':
+          description: Test retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/MentalHealthTest'
+  
+  /api/test-results:
+    post:
+      tags:
+        - Mental Health
+      summary: Submit test results
+      description: Submit mental health test results
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TestResultSubmission'
+      responses:
+        '201':
+          description: Test results submitted successfully
+    
+    get:
+      tags:
+        - Mental Health
+      summary: Get test results history
+      description: Retrieve user's test results history
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Test results retrieved successfully
+
+  
+  # PCOS Assessment Endpoints
+  /api/pcos-assessment/questions:
+    get:
+      tags:
+        - PCOS Assessment
+      summary: Get PCOS assessment questions
+      description: Retrieve PCOS assessment questionnaire
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Questions retrieved successfully
+  
+  /api/pcos-assessment/submit:
+    post:
+      tags:
+        - PCOS Assessment
+      summary: Submit PCOS assessment
+      description: Submit PCOS assessment responses
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                responses:
+                  type: array
+                  items:
+                    type: object
+      responses:
+        '201':
+          description: Assessment submitted successfully
+  
+  /api/pcos-assessment/history:
+    get:
+      tags:
+        - PCOS Assessment
+      summary: Get PCOS assessment history
+      description: Retrieve user's PCOS assessment history
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: History retrieved successfully
+  
+  /api/pcos-assessment:
+    get:
+      tags:
+        - PCOS Assessment
+      summary: Get latest PCOS assessment
+      description: Retrieve user's latest PCOS assessment result
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Assessment retrieved successfully
+  
+  # Symptoms Tracking Endpoints
+  /api/symptoms-tracking:
+    post:
+      tags:
+        - Symptoms Tracking
+      summary: Submit symptoms tracking
+      description: Submit daily symptoms and mood tracking data
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SymptomsTrackingRequest'
+      responses:
+        '201':
+          description: Symptoms tracking submitted successfully
+    
+    get:
+      tags:
+        - Symptoms Tracking
+      summary: Get symptoms tracking history
+      description: Retrieve user's symptoms tracking history
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [Period, Pregnancy]
+        - name: date
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Symptoms tracking history retrieved successfully
+
+  
+  # Weight & Metabolic Wellness Endpoints
+  /api/weight-metabolic-wellness:
+    get:
+      tags:
+        - Weight & Metabolic Wellness
+      summary: Get weight and metabolic data
+      description: Retrieve user's weight and metabolic wellness data
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Data retrieved successfully
+    
+    post:
+      tags:
+        - Weight & Metabolic Wellness
+      summary: Add weight/metabolic entry
+      description: Add new weight and metabolic wellness entry
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                weight:
+                  type: number
+                height:
+                  type: number
+                bmi:
+                  type: number
+                date:
+                  type: string
+                  format: date
+      responses:
+        '201':
+          description: Entry added successfully
+  
+  # Journal Endpoints
+  /api/journals:
+    get:
+      tags:
+        - Journals
+      summary: Get journals
+      description: Retrieve user's journal entries with pagination and filtering
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: date
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: category
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Journals retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JournalListResponse'
+    
+    post:
+      tags:
+        - Journals
+      summary: Create journal entry
+      description: Create a new journal entry
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JournalRequest'
+      responses:
+        '201':
+          description: Journal created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Journal'
+
+  
+  /api/journals/{journalId}:
+    get:
+      tags:
+        - Journals
+      summary: Get journal by ID
+      description: Retrieve a specific journal entry
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: journalId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Journal retrieved successfully
+        '404':
+          description: Journal not found
+    
+    put:
+      tags:
+        - Journals
+      summary: Update journal
+      description: Update an existing journal entry
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: journalId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JournalRequest'
+      responses:
+        '200':
+          description: Journal updated successfully
+    
+    delete:
+      tags:
+        - Journals
+      summary: Delete journal
+      description: Delete a journal entry
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: journalId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Journal deleted successfully
+        '404':
+          description: Journal not found
+  
+  /api/journals/user/{userId}:
+    get:
+      tags:
+        - Journals
+      summary: Get journals by user
+      description: Retrieve all journals for a specific user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Journals retrieved successfully
+
+  
+  # Health Tracking Endpoints
+  /api/period-cycle:
+    get:
+      tags:
+        - Period Tracker
+      summary: Get period cycle data
+      description: Get the authenticated user's period cycle information
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Period cycle data retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/PeriodCycle'
+    
+    post:
+      tags:
+        - Period Tracker
+      summary: Add period cycle entry
+      description: Add a new period cycle entry
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PeriodCycleRequest'
+      responses:
+        '201':
+          description: Period cycle entry added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PeriodCycleResponse'
+  
+  /api/period-cycle/reset:
+    delete:
+      tags:
+        - Period Tracker
+      summary: Reset period tracker
+      description: Reset the user's period tracking data
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Period tracker reset successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Period tracker reset successfully"
+
+  /api/pregnancy-tracker:
+    get:
+      tags:
+        - Pregnancy Tracker
+      summary: Get pregnancy tracking data
+      description: Get the authenticated user's pregnancy tracking information
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Pregnancy tracking data retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/PregnancyData'
+    
+    post:
+      tags:
+        - Pregnancy Tracker
+      summary: Add pregnancy tracking entry
+      description: Add a new pregnancy tracking entry
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PregnancyDataRequest'
+      responses:
+        '201':
+          description: Pregnancy tracking entry added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PregnancyDataResponse'
+
+  # FSFI (Female Sexual Function Index) Endpoints
+  /api/fsfi/test:
+    get:
+      tags:
+        - Sexual Wellness (FSFI)
+      summary: Get FSFI test questions
+      description: Get the Female Sexual Function Index test questions
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: FSFI test questions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/FSFITest'
+  
+  /api/fsfi/submit:
+    post:
+      tags:
+        - Sexual Wellness (FSFI)
+      summary: Submit FSFI test answers
+      description: Submit answers for the FSFI test
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FSFISubmission'
+      responses:
+        '201':
+          description: FSFI test submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FSFIResult'
+  
+  /api/fsfi/my-results:
+    get:
+      tags:
+        - Sexual Wellness (FSFI)
+      summary: Get user's FSFI test results
+      description: Get the authenticated user's FSFI test results history
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: FSFI test results retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FSFIResult'
+
+  # Mental Health Endpoints
+  /api/mental-health/tests:
+    get:
+      tags:
+        - Mental Health
+      summary: Get available mental health tests
+      description: Get a list of available mental health assessment tests
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Mental health tests retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MentalHealthTest'
+  
+  /api/mental-health/tests/{testId}:
+    get:
+      tags:
+        - Mental Health
+      summary: Get mental health test by ID
+      description: Get details of a specific mental health test
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: testId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the mental health test
+      responses:
+        '200':
+          description: Mental health test retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/MentalHealthTest'
+  
+  /api/mental-health/test-results:
+    post:
+      tags:
+        - Mental Health
+      summary: Submit mental health test results
+      description: Submit answers for a mental health assessment
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MentalHealthSubmission'
+      responses:
+        '201':
+          description: Mental health test results submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MentalHealthResult'
+    
+    get:
+      tags:
+        - Mental Health
+      summary: Get user's mental health test results
+      description: Get the authenticated user's mental health test results history
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Mental health test results retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MentalHealthResult'
+
+  # PCOS Assessment Endpoints
+  /api/pcos-assessment:
+    get:
+      tags:
+        - PCOS Assessment
+      summary: Get latest PCOS assessment
+      description: Get the user's most recent PCOS assessment
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: PCOS assessment retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/PCOSAssessment'
+    
+    post:
+      tags:
+        - PCOS Assessment
+      summary: Submit PCOS assessment
+      description: Submit a new PCOS self-assessment
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PCOSSubmission'
+      responses:
+        '201':
+          description: PCOS assessment submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PCOSResult'
+  
+  /api/pcos-assessment/history:
+    get:
+      tags:
+        - PCOS Assessment
+      summary: Get PCOS assessment history
+      description: Get the user's PCOS assessment history
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: PCOS assessment history retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PCOSAssessment'
+
+  # Symptoms Tracking Endpoints
+  /api/symptoms-tracking:
+    post:
+      tags:
+        - Symptoms Tracking
+      summary: Submit symptom tracking data
+      description: Submit daily symptom tracking data
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SymptomTrackingRequest'
+      responses:
+        '201':
+          description: Symptoms tracked successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SymptomTrackingResponse'
+    
+    get:
+      tags:
+        - Symptoms Tracking
+      summary: Get symptom tracking history
+      description: Get the user's symptom tracking history
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: startDate
+          schema:
+            type: string
+            format: date
+          description: Start date for filtering (YYYY-MM-DD)
+        - in: query
+          name: endDate
+          schema:
+            type: string
+            format: date
+          description: End date for filtering (YYYY-MM-DD)
+      responses:
+        '200':
+          description: Symptom tracking history retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SymptomTrackingEntry'
+
+  # Weight & Metabolic Wellness Endpoints
+  /api/weight-metabolic-wellness:
+    get:
+      tags:
+        - Weight & Metabolic Wellness
+      summary: Get weight and metabolic data
+      description: Get the user's weight and metabolic wellness data
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: period
+          schema:
+            type: string
+            enum: ["7d", "30d", "90d", "1y", "all"]
+          description: Time period to retrieve data for
+      responses:
+        '200':
+          description: Weight and metabolic data retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/WeightMetabolicData'
+    
+    post:
+      tags:
+        - Weight & Metabolic Wellness
+      summary: Add weight and metabolic data
+      description: Add a new weight and metabolic wellness entry
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WeightMetabolicRequest'
+      responses:
+        '201':
+          description: Weight and metabolic data added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeightMetabolicResponse'
+
+  # Groups & Community Endpoints
+  /api/sessions/active:
+    get:
+      tags:
+        - Sessions & Bookings
+      summary: Get active booking sessions
+      description: Get currently active or upcoming booking sessions for the authenticated user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Active sessions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BookingWithDoctor'
+
+  # Clinic Endpoints
+  /api/clinics:
+    get:
+      tags:
+        - Clinics
+      summary: Get list of clinics
+      description: Get a list of available clinics
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: name
+          schema:
+            type: string
+          description: Filter clinics by name
+        - in: query
+          name: location
+          schema:
+            type: string
+          description: Filter clinics by location
+      responses:
+        '200':
+          description: List of clinics retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Clinic'
+
+  /api/clinic-bookings:
+    post:
+      tags:
+        - Clinics
+      summary: Book a clinic appointment
+      description: Create a new clinic appointment booking
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClinicBookingRequest'
+      responses:
+        '201':
+          description: Clinic appointment booked successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClinicBookingResponse'
+  
+  /api/clinic-bookings/verify-payment:
+    post:
+      tags:
+        - Clinics
+      summary: Verify clinic booking payment
+      description: Verify payment for a clinic booking
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - bookingId
+                - paymentId
+                - signature
+              properties:
+                bookingId:
+                  type: string
+                  description: ID of the clinic booking
+                paymentId:
+                  type: string
+                  description: Payment ID from payment gateway
+                signature:
+                  type: string
+                  description: Payment signature for verification
+      responses:
+        '200':
+          description: Payment verified and clinic booking confirmed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Payment verified and clinic booking confirmed"
+                  data:
+                    $ref: '#/components/schemas/ClinicBooking'
+
+  /api/clinic-bookings/my-bookings:
+    get:
+      tags:
+        - Clinics
+      summary: Get user's clinic bookings
+      description: Get a list of the authenticated user's clinic bookings
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: ["upcoming", "completed", "cancelled"]
+          description: Filter bookings by status
+      responses:
+        '200':
+          description: User's clinic bookings retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ClinicBooking'
+
+  # Diagnostics Endpoints
+  /api/diagnostics:
+    get:
+      tags:
+        - Diagnostics
+      summary: Get list of diagnostic tests
+      description: Get a list of available diagnostic tests
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: category
+          schema:
+            type: string
+          description: Filter tests by category
+      responses:
+        '200':
+          description: List of diagnostic tests retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DiagnosticTest'
+
+  /api/diagnostics-bookings:
+    post:
+      tags:
+        - Diagnostics
+      summary: Book a diagnostic test
+      description: Create a new diagnostic test booking
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DiagnosticBookingRequest'
+      responses:
+        '201':
+          description: Diagnostic test booked successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiagnosticBookingResponse'
+  
+  /api/diagnostics-bookings/verify-payment:
+    post:
+      tags:
+        - Diagnostics
+      summary: Verify diagnostic booking payment
+      description: Verify payment for a diagnostic test booking
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - bookingId
+                - paymentId
+                - signature
+              properties:
+                bookingId:
+                  type: string
+                  description: ID of the diagnostic booking
+                paymentId:
+                  type: string
+                  description: Payment ID from payment gateway
+                signature:
+                  type: string
+                  description: Payment signature for verification
+      responses:
+        '200':
+          description: Payment verified and diagnostic booking confirmed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Payment verified and diagnostic booking confirmed"
+                  data:
+                    $ref: '#/components/schemas/DiagnosticBooking'
+  
+  /api/groups:
+    get:
+      tags:
+        - Groups & Community
+      summary: Get all groups
+      description: Retrieve list of all available groups
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Groups retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Group'
+  
+  /api/groups/joined:
+    get:
+      tags:
+        - Groups & Community
+      summary: Get joined groups
+      description: Retrieve groups that user has joined
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Joined groups retrieved successfully
+  
+  /api/groups/{groupId}/join:
+    post:
+      tags:
+        - Groups & Community
+      summary: Join a group
+      description: Join a community group
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully joined group
+  
+  /api/groups/{groupId}/leave:
+    post:
+      tags:
+        - Groups & Community
+      summary: Leave a group
+      description: Leave a community group
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully left group
+  
+  /api/groups/{groupId}/posts:
+    get:
+      tags:
+        - Groups & Community
+      summary: Get group posts
+      description: Retrieve posts from a specific group
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Posts retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/GroupPost'
+    
+    post:
+      tags:
+        - Groups & Community
+      summary: Create group post
+      description: Create a new post in a group
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                images:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '201':
+          description: Post created successfully
+
+  
+  /api/groups/posts:
+    get:
+      tags:
+        - Groups & Community
+      summary: Get all community posts
+      description: Retrieve posts from all groups
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Posts retrieved successfully
+  
+  /api/groups/comments/my:
+    get:
+      tags:
+        - Groups & Community
+      summary: Get user's comments
+      description: Retrieve all comments made by the user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Comments retrieved successfully
+  
+  # Blog Endpoints
+  /api/blogs:
+    get:
+      tags:
+        - Blogs
+      summary: Get blog articles
+      description: Retrieve list of blog articles
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: category
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Blogs retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Blog'
+  
+  /api/blogs/{blogId}:
+    get:
+      tags:
+        - Blogs
+      summary: Get blog by ID
+      description: Retrieve a specific blog article
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: blogId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Blog retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Blog'
+
+  
+  # Chat Endpoints
+  /api/chat/send:
+    post:
+      tags:
+        - Chat
+      summary: Send chat message
+      description: Send a message in chat
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                recipientId:
+                  type: string
+                message:
+                  type: string
+                attachments:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Message sent successfully
+  
+  /api/chat/history/{userId}:
+    get:
+      tags:
+        - Chat
+      summary: Get chat history
+      description: Retrieve chat history with a specific user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Chat history retrieved successfully
+  
+  /api/chat/rooms:
+    get:
+      tags:
+        - Chat
+      summary: Get chat rooms
+      description: Retrieve all chat rooms for the user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Chat rooms retrieved successfully
+  
+  # Media Gallery Endpoints
+  /api/media-gallery:
+    get:
+      tags:
+        - Media Gallery
+      summary: Get media gallery
+      description: Retrieve user's media gallery items
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Media gallery retrieved successfully
+    
+    post:
+      tags:
+        - Media Gallery
+      summary: Upload media
+      description: Upload media to gallery
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                title:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '201':
+          description: Media uploaded successfully
+  
+  # Survey Endpoints
+  /api/surveys:
+    get:
+      tags:
+        - Surveys
+      summary: Get available surveys
+      description: Retrieve list of available surveys
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Surveys retrieved successfully
+  
+  /api/surveys/{surveyId}/questions:
+    get:
+      tags:
+        - Surveys
+      summary: Get survey questions
+      description: Retrieve questions for a specific survey
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: surveyId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Survey questions retrieved successfully
+
+security:
+  - bearerAuth: []
