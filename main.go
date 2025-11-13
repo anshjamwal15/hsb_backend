@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -24,6 +25,8 @@ func main() {
 	}
 	defer db.Disconnect()
 
+	log.Println("✅ Connected to MongoDB successfully")
+
 	// Initialize server
 	srv := server.NewServer(cfg, db)
 
@@ -34,7 +37,7 @@ func main() {
 		}
 	}()
 
-	log.Printf("Server started on port %s", cfg.Port)
+	printStartupInfo(cfg.Port)
 
 	// Wait for interrupt signal to gracefully shut down the server
 	quit := make(chan os.Signal, 1)
@@ -43,14 +46,28 @@ func main() {
 
 	log.Println("Shutting down server...")
 
-	// The context is used to inform the server it has 5 seconds to finish
+	// The context is used to inform the server it has 10 seconds to finish
 	// the request it is currently handling
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatal("Server forced to shutdown:", err)
 	}
 
-	log.Println("Server exiting")
+	log.Println("Server exited")
+}
+
+func printStartupInfo(port string) {
+	fmt.Println("\n" + "═══════════════════════════════════════════════════════════════")
+	fmt.Println("🚀 Women's Health Backend Server")
+	fmt.Println("═══════════════════════════════════════════════════════════════")
+	fmt.Printf("📡 Server URL:          http://localhost:%s\n", port)
+	fmt.Printf("📚 Swagger UI:          http://localhost:%s/swagger-ui\n", port)
+	fmt.Printf("📄 Swagger YAML:        http://localhost:%s/swagger.yaml\n", port)
+	fmt.Printf("❤️  Health Check:        http://localhost:%s/health\n", port)
+	fmt.Println("═══════════════════════════════════════════════════════════════")
+	fmt.Printf("✨ Server is running on port %s\n", port)
+	fmt.Println("🎯 Ready to accept requests!")
+	fmt.Println()
 }
