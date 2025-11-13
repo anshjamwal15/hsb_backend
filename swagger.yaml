@@ -10,8 +10,8 @@ info:
     email: support@womenhealth.com
 
 servers:
-  # - url: https://womenhealth-api.volvrit.org
-    # description: Production server
+  - url: https://hsbbackend-production.up.railway.app
+    description: Production server (Railway)
   - url: http://localhost:8080
     description: Local development server
 
