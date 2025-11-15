@@ -43,7 +43,7 @@ func AuthMiddleware(jwtSecret string) gin.HandlerFunc {
 			return
 		}
 
-		userID, ok := claims["userID"].(string)
+		userID, ok := claims["userId"].(string)
 		if !ok || userID == "" {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid user ID in token"})
 			return
